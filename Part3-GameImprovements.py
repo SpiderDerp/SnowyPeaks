@@ -102,8 +102,7 @@ def plat_gen(): # Generates platforms ahead of time
         C = True    
         while C: #Implements check to platform gen     
              p = platform()
-             p.rect.center = (random.randrange(0, WIDTH - width),
-                             random.randrange(-50, 0))
+             p.rect.center = (random.randrange(0, WIDTH - width), random.randrange(-50, 0))
              C = check(p, platforms)
         platforms.add(p)
         all_sprites.add(p)
@@ -125,7 +124,13 @@ platforms.add(PT1)
 
 
 for x in range(random.randint(5, 6)): #Allows for the creation of multiple platforms
+
+    #NEW!! (Update)
+    C = True
     pl = platform()
+    while C:
+        pl = platform()
+        C = check(pl, platforms)
     platforms.add(pl)
     all_sprites.add(pl)
 

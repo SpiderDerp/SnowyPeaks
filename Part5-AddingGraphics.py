@@ -148,7 +148,11 @@ PT1.moving = False #Sets up moving platforms
 PT1.point = False
 
 for x in range(random.randint(5, 6)): #Allows for the creation of multiple platforms
+    C = True
     pl = platform()
+    while C:
+        pl = platform()
+        C = check(pl, platforms)
     platforms.add(pl)
     all_sprites.add(pl)
 
