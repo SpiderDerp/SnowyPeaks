@@ -174,6 +174,9 @@ def Title(): #Creates the title screen
 
 def Game():
     while True: # Game loop
+        
+        P1.update() # Updates the player
+
         for event in pygame.event.get(): # Gets all the events
             if event.type == QUIT: # If the event is a quit (X out of the window)
                 pygame.quit()
@@ -191,8 +194,6 @@ def Game():
                     plat.kill()
 
         displaysurface.fill((0,0,0)) # Fills the screen with a color
-
-        P1.update() # Updates the player
 
         plat_gen() # Generates platforms
 
