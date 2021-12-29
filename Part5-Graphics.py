@@ -201,6 +201,7 @@ class CameraController:
 
 class Scorekeeper:
     font = pygame.font.Font('Assets/8-BIT WONDER.ttf', 32)
+    outline = pygame.font.Font('Assets/8-BIT WONDER.ttf', 36)
     score = 0
     height_offset = HEIGHT
 
@@ -216,7 +217,9 @@ class Scorekeeper:
             self.height_offset += dist
 
     def display(self):
-        score_img = self.font.render(str(self.score), True, (255, 255, 255))
+        score_img = self.font.render(str(self.score), True, (150, 241, 250))
+        score_outline = self.outline.render(str(self.score), True, (7, 61, 66))
+        displaysurface.blit(score_outline, (WIDTH / 2 - 16, 10))
         displaysurface.blit(score_img, (WIDTH / 2 - 16, 10))
 
 
