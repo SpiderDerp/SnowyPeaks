@@ -48,6 +48,9 @@ class Player(Entity):  # Class that represents the player
         self.surf.fill((128, 255, 40))  # Fills the surface with a color
         self.rect = self.surf.get_rect()  # Creates the rectangular "hitbox" for the player using our graphical surface
 
+        # TODO set initial position to center bottom of screen
+        self.rect.midbottom = (WIDTH / 2, HEIGHT - 20)
+
         self.vel = Vector2(0, 0)  # Zeroes out the velocity of the player
 
     def move_horizontal(self, pressed_keys):  # Moves the player
@@ -77,8 +80,10 @@ class Player(Entity):  # Class that represents the player
         # Makes sure player is approaching platform from the top (moving downwards, falling downwards onto it)
         if self.vel.y > 0:
             if hits:  # If the player is colliding with any platform
-                self.rect.bottom = hits[0].rect.top + 1  # Sets player y-position to be on top of platform
-                self.vel.y = 0  # Zeroes out velocity (Stops the object)
+                # TODO check so player doesn't clip on top of or thorugh platforms
+                if self.rect.bottom <= hits[0].rect.top + 1 + self.vel.y:  # Sets player y-position to be on top of platform
+                    self.rect.bottom = hits[0].rect.top + 1  # Sets player y-position to be on top of platform
+                    self.vel.y = 0  # Zeroes out velocity (Stops the object)
 
         # Makes it so the player does not go off screen
         # Clamp the x-values to the bounds of the screen
@@ -94,11 +99,10 @@ class Player(Entity):  # Class that represents the player
             self.jump()
 
     def jump(self):  # Allows the player to jump
-        # Check if the player is touching terrain
+        # TODO make the jump a bit less potent
         hits = pygame.sprite.spritecollideany(player, terrain_sprites)
-        print(hits)
-        if hits is not None:  # Makes sure player is contacting a solid object (the platforms)
-            self.vel.y = -15
+        if hits:  # Makes sure player is contacting a solid object (the platforms)
+            self.vel.y = -12
 
 
 class Platform(Entity):  # Creates the platforms
@@ -109,19 +113,53 @@ class Platform(Entity):  # Creates the platforms
         self.rect = self.surf.get_rect()  # Creates the hitbox of the platform
         self.rect.center = Vector2((WIDTH / 2, HEIGHT - 10))
 
+    # TODO Randomizes size
+    def randomize_size(self):
+        # TODO New Feature - Generates a thinner platform with a random, variable width
+        self.surf = pygame.Surface((random.randint(50, 100), 12))
+        self.surf.fill((255, 0, 0))  # Fills the surface with a color
+        self.rect = self.surf.get_rect()  # Creates the hitbox of the platform
+
+# TODO this class is new
+class PlatformGenerator():
+    vertical_counter = 0
+    increment = 75
+
+    def generate(self):
+        new_platforms = pygame.sprite.Group()
+        height_offset = random.randint(-5, 5)
+
+        while self.vertical_counter < 2 * HEIGHT:
+            move_up = random.choice([0, 1, 1, 1])
+            if move_up:
+                self.vertical_counter += self.increment
+                height_offset = random.randint(-5, 5)
+            platform = Platform()
+            platform.randomize_size()
+            platform.rect.centerx = random.randint(0, WIDTH)
+            y_position = HEIGHT - self.vertical_counter +height_offset
+            platform.rect.bottom = y_position
+
+            new_platforms.add(platform)
+        return new_platforms
+
+
+
 
 ground = Platform()  # Creates the first platform
 player = Player()  # Creates the player
-
 sprites = pygame.sprite.Group()  # Creates the group of all sprites
 sprites.add(ground)  # Adds the first platform to the group
 sprites.add(player)  # Adds the player to the group
-
 key_listeners = pygame.sprite.Group()  # Group of sprites that listen to key events
 key_listeners.add(player)
 
 terrain_sprites = pygame.sprite.Group()  # Creates the group of platforms
 terrain_sprites.add(ground)
+generator = PlatformGenerator()
+for p in generator.generate():
+    terrain_sprites.add(p)
+    sprites.add(p)
 
 
 def main():
@@ -142,6 +180,7 @@ def main():
 
         for entity in sprites:
             entity.late_update()
+
 
         for entity in sprites:  # For every entity in the group
             displaysurface.blit(entity.surf, entity.rect)  # Displays the entity to the screen

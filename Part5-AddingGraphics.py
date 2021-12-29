@@ -16,7 +16,7 @@ FPS = 60 # Frames per second
 FramePerSec = pygame.time.Clock() # FPS
 
    
-font = pygame.font.Font('Resources\\8-BIT WONDER.ttf', 32)
+font = pygame.font.Font('Assets\\8-BIT WONDER.ttf', 32)
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT)) # Sets the size of the screen
 pygame.display.set_caption("Snowy Peaks") # Sets the name of the game
@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite): # Creates the player
         super().__init__() 
 
         #NEW!!(Update)
-        self.image = pygame.image.load("Resources\Character.png") # Loads the image
+        self.image = pygame.image.load("Assets\Character.png") # Loads the image
         self.image = pygame.transform.scale(self.image, (30, 30)) # Resizes the image
         self.rect = self.image.get_rect(center = (15, 415)) # Creates the rectangle of the player
 
@@ -84,7 +84,7 @@ class platform(pygame.sprite.Sprite): # Creates the platforms
         super().__init__()
         
         #NEW!!(Update)
-        self.image = pygame.image.load("Resources\Platform.png") # Loads the image
+        self.image = pygame.image.load("Assets/Platform.png") # Loads the image
         self.image = pygame.transform.scale(self.image, (random.randint(50,100), 12)) # Resizes the image
         self.rect = self.image.get_rect(center = (random.randint(0,WIDTH-10), random.randint(0, HEIGHT-30))) # Creates the rectangle of the platform
            
@@ -168,7 +168,7 @@ def Title(): #Creates the title screen
                     pygame.display.update()
                     Game() # Starts the game
 
-        TitleImg = pygame.image.load('Resources\\Title.png')
+        TitleImg = pygame.image.load('Assets\\Title.png')
         displaysurface.fill((0,0,0))
         displaysurface.blit(TitleImg, (0,0))
         pygame.display.update()
@@ -176,7 +176,7 @@ def Title(): #Creates the title screen
 
 def Game():
     #NEW!!
-    bg = pygame.image.load("Resources\\Background.png") #adds background
+    bg = pygame.image.load("Assets\\Background.png") #adds background
 
     while True: # Game loop
 
@@ -238,7 +238,7 @@ def GameOver():
                 pygame.quit()
                 sys.exit()
         
-        GameOverImg = pygame.image.load('Resources\\GameOver.png')
+        GameOverImg = pygame.image.load('Assets\\GameOver.png')
         displaysurface.fill((0,0,0))
         displaysurface.blit(GameOverImg, (0,0))
         pygame.display.update()
