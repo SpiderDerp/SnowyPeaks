@@ -177,7 +177,7 @@ class CameraController:
 
 # TODO - new class Scorekeeper
 class Scorekeeper:
-    font = pygame.font.Font('Assets\\8-BIT WONDER.ttf', 32)
+    font = pygame.font.Font('Assets/8-BIT WONDER.ttf', 32)
     score = 0
     height_offset = HEIGHT
 
