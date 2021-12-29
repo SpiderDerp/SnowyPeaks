@@ -9,10 +9,12 @@ pygame.init()
 
 HEIGHT = 450  # Height of the screen
 WIDTH = 400  # Width of the screen
-ACC = 0.5  # Acceleration of the character
-GRAVITY = 0.5
-FRIC = 0.2  # Friction of the character
+ACC = 0.4  # Acceleration of the character
+GRAVITY = 0.3
+FRIC = 0.3  # Friction of the character
 FPS = 60  # Frames per second
+
+JUMP = 8
 
 frame_clock = pygame.time.Clock()  # FPS
 

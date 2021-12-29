@@ -9,11 +9,12 @@ pygame.init()
 
 HEIGHT = 450  # Height of the screen
 WIDTH = 400  # Width of the screen
-ACC = 0.5  # Acceleration of the character
-GRAVITY = 0.5
-FRIC = 0.2  # Friction of the character
+ACC = 0.4  # Acceleration of the character
+GRAVITY = 0.3
+FRIC = 0.3  # Friction of the character
 FPS = 60  # Frames per second
 
+JUMP = 10
 frame_clock = pygame.time.Clock()  # FPS
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))  # Sets the size of the screen
@@ -126,7 +127,7 @@ class Player(Entity):  # Class that represents the player
     def jump(self):  # Allows the player to jump
         hits = pygame.sprite.spritecollideany(player, terrain_sprites)
         if hits:  # Makes sure player is contacting a solid object (the platforms)
-            self.vel.y = -12
+            self.vel.y = -JUMP
 
 
 class Platform(Entity):  # Creates the platforms
