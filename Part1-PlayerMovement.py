@@ -43,7 +43,8 @@ class Entity(pygame.sprite.Sprite):
 class Player(Entity):  # Class that represents the player
     dimensions = Vector2(30, 30)
 
-    def __init__(self):
+    def __init__(self, terrain):
+        self.terrain = terrain
 
         super().__init__()
         self.surf = pygame.Surface(self.dimensions)  # Creates the surface "image" of the player sprite
@@ -59,10 +60,13 @@ class Player(Entity):  # Class that represents the player
         if pressed_keys[K_d]:
             self.vel.x += ACC
 
-        if self.vel.x < ACC / 2:
+        if self.vel.x < -FRIC:
             self.vel.x += FRIC
-        elif self.vel.x > ACC / 2:
+        elif self.vel.x > FRIC:
             self.vel.x -= FRIC
+        else:
+            self.vel.x = 0
+
 
     def update(self):
         pressed_keys = pygame.key.get_pressed()
@@ -74,7 +78,7 @@ class Player(Entity):  # Class that represents the player
 
     def late_update(self):  # Object Collision
         # Find out which platforms have collided with the player
-        hits = pygame.sprite.spritecollide(self, terrain_sprites, dokill=False)
+        hits = pygame.sprite.spritecollide(self, self.terrain, dokill=False)
 
         # Makes sure player is approaching platform from the top (moving downwards, falling downwards onto it)
         if self.vel.y > 0:
@@ -97,7 +101,7 @@ class Player(Entity):  # Class that represents the player
 
     def jump(self):  # Allows the player to jump
         # Check if the player is touching terrain
-        hits = pygame.sprite.spritecollideany(player, terrain_sprites)
+        hits = pygame.sprite.spritecollideany(self, self.terrain)
         print(hits)
         if hits is not None:  # Makes sure player is contacting a solid object (the platforms)
             self.vel.y = -15
@@ -112,21 +116,23 @@ class Platform(Entity):  # Creates the platforms
         self.rect.center = Vector2((WIDTH / 2, HEIGHT - 10))
 
 
-ground = Platform()  # Creates the first platform
-player = Player()  # Creates the player
-
-sprites = pygame.sprite.Group()  # Creates the group of all sprites
-sprites.add(ground)  # Adds the first platform to the group
-sprites.add(player)  # Adds the player to the group
-
-key_listeners = pygame.sprite.Group()  # Group of sprites that listen to key events
-key_listeners.add(player)
-
-terrain_sprites = pygame.sprite.Group()  # Creates the group of platforms
-terrain_sprites.add(ground)
 
 
 def main():
+
+
+    ground = Platform()  # Creates the first platform
+
+    terrain_sprites = pygame.sprite.Group()  # Creates the group of platforms
+    terrain_sprites.add(ground)
+    player = Player(terrain_sprites)  # Creates the player
+
+    sprites = pygame.sprite.Group()  # Creates the group of all sprites
+    sprites.add(ground)  # Adds the first platform to the group
+    sprites.add(player)  # Adds the player to the group
+    key_listeners = pygame.sprite.Group()  # Group of sprites that listen to key events
+    key_listeners.add(player)
+
     while True:  # Game loop
         displaysurface.fill((0, 0, 0))  # Makes the background black
 

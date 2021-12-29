@@ -44,8 +44,9 @@ class Player(Entity):  # Class that represents the player
     # New, to flip the sprite
     facing_right = True
 
-    def __init__(self, scorekeeper):
+    def __init__(self, scorekeeper, terrain):
         self.scorekeeper = scorekeeper
+        self.terrain = terrain
 
         super().__init__()
 
@@ -68,22 +69,23 @@ class Player(Entity):  # Class that represents the player
         if pressed_keys[K_d]:
             self.vel.x += ACC
 
-        if self.vel.x < ACC / 2:
+        if self.vel.x < -FRIC:
             self.vel.x += FRIC
-        elif self.vel.x > ACC / 2:
+        elif self.vel.x > FRIC:
             self.vel.x -= FRIC
-
+        else:
+            self.vel.x = 0
 
         old_facing_right = self.facing_right
         # TODO new - determine where character is facing based on x-velocity
         # We use ACC because our velocity fluctuates a lot, print the velocity to show this
-        if self.vel.x > ACC: # facing right
+        if self.vel.x > ACC:  # facing right
             self.facing_right = True
         elif self.vel.x < -ACC:
             self.facing_right = False
         # print(self.vel.x)
 
-        if old_facing_right != self.facing_right: # If our facing direction changed
+        if old_facing_right != self.facing_right:  # If our facing direction changed
             self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self):
@@ -96,7 +98,7 @@ class Player(Entity):  # Class that represents the player
 
     def late_update(self):  # Object Collision
         # Find out which platforms have collided with the player
-        hits = pygame.sprite.spritecollide(self, terrain_sprites, dokill=False)
+        hits = pygame.sprite.spritecollide(self, self.terrain, dokill=False)
 
         # Makes sure player is approaching platform from the top (moving downwards, falling downwards onto it)
         if self.vel.y > 0:
@@ -105,8 +107,7 @@ class Player(Entity):  # Class that represents the player
                     0].rect.top + 1 + self.vel.y:  # Sets player y-position to be on top of platform
                     self.rect.bottom = hits[0].rect.top + 1  # Sets player y-position to be on top of platform
                     self.vel.y = 0  # Zeroes out velocity (Stops the object)
-                    scorekeeper.on_platform_hit(hits[0])
-
+                    self.scorekeeper.on_platform_hit(hits[0])
 
         # Makes it so the player does not go off screen
         # Clamp the x-values to the bounds of the screen
@@ -117,15 +118,12 @@ class Player(Entity):  # Class that represents the player
             self.rect.left = 0
             self.vel.x = 0
 
-
-
-
     def on_key_down(self, event):
         if event.key == K_w:
             self.jump()
 
     def jump(self):  # Allows the player to jump
-        hits = pygame.sprite.spritecollideany(player, terrain_sprites)
+        hits = pygame.sprite.spritecollideany(self, self.terrain)
         if hits:  # Makes sure player is contacting a solid object (the platforms)
             self.vel.y = -JUMP
 
@@ -201,6 +199,8 @@ class CameraController:
 
 class Scorekeeper:
     font = pygame.font.Font('Assets/8-BIT WONDER.ttf', 32)
+    # TODO this is new, outline so we can see score better
+    outline = pygame.font.Font('Assets/8-BIT WONDER.ttf', 38)
     score = 0
     height_offset = HEIGHT
 
@@ -216,30 +216,27 @@ class Scorekeeper:
             self.height_offset += dist
 
     def display(self):
-        score_img = self.font.render(str(self.score), True, (255, 255, 255))
+        # TODO this is new, outline so we can see score better
+        score_outline = self.outline.render(str(self.score), True, (7, 61, 66))
+        displaysurface.blit(score_outline, (WIDTH / 2 - 18, 10))
+        score_img = self.font.render(str(self.score), True, (150, 241, 250))
         displaysurface.blit(score_img, (WIDTH / 2 - 16, 10))
 
 
-scorekeeper = Scorekeeper()
+class PlayAgainButton(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load("Assets/PlayAgain.png")
+        self.image = pygame.transform.scale(self.image, (128, 84))
+        self.rect = self.image.get_rect()
+        self.rect.center = WIDTH / 2, HEIGHT * 5 / 6
 
-ground = Platform()  # Creates the first platform
-player = Player(scorekeeper)  # Creates the player
+    def on_mouse_click(self, position):
+        if self.rect.collidepoint(position):
+            main()
 
-sprites = pygame.sprite.Group()  # Creates the group of all sprites
-sprites.add(ground)  # Adds the first platform to the group
-sprites.add(player)  # Adds the player to the group
-key_listeners = pygame.sprite.Group()  # Group of sprites that listen to key events
-key_listeners.add(player)
-
-terrain_sprites = pygame.sprite.Group()  # Creates the group of platforms
-terrain_sprites.add(ground)
-generator = PlatformGenerator()
-for p in generator.generate():
-    terrain_sprites.add(p)
-    sprites.add(p)
 
 # Instantiate camera controller
-controller = CameraController(player, terrain_sprites, [generator, scorekeeper])
 
 def start():
     # Temporary game loop for title screen
@@ -257,28 +254,49 @@ def start():
         pygame.display.update()
         frame_clock.tick(FPS)
 
+
 def end():
     # Temporary game loop for title screen
     end_image = pygame.image.load("Assets/GameOver.png")
     end_image = pygame.transform.scale(end_image, (WIDTH, HEIGHT))
+
+    play_button = PlayAgainButton()
     while True:  # Game loop
         for event in pygame.event.get():
             if event.type == QUIT:  # If the event is a quit (X out of the window)
                 pygame.quit()
                 sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                play_button.on_mouse_click(pygame.mouse.get_pos())
         displaysurface.fill((0, 0, 0))
         displaysurface.blit(end_image, (0, 0))
+
+        displaysurface.blit(play_button.image, play_button.rect)
         pygame.display.update()
         frame_clock.tick(FPS)
 
 
-def check_if_end():
-    if player.rect.top > HEIGHT:
-        end()
-
-
 def main():
     start()
+
+    scorekeeper = Scorekeeper()
+
+    ground = Platform()  # Creates the first platform
+
+    terrain_sprites = pygame.sprite.Group()  # Creates the group of platforms
+    terrain_sprites.add(ground)
+    player = Player(scorekeeper, terrain_sprites)  # Creates the player
+    generator = PlatformGenerator()
+
+    sprites = pygame.sprite.Group()  # Creates the group of all sprites
+    sprites.add(ground)  # Adds the first platform to the group
+    sprites.add(player)  # Adds the player to the group
+    key_listeners = pygame.sprite.Group()  # Group of sprites that listen to key events
+    key_listeners.add(player)
+    for p in generator.generate():
+        terrain_sprites.add(p)
+        sprites.add(p)
+    controller = CameraController(player, terrain_sprites, [generator, scorekeeper])
 
     # TODO new initializer code loads the scene background
     bg = pygame.image.load("Assets/Background.png")
@@ -314,7 +332,8 @@ def main():
             displaysurface.blit(entity.image, entity.rect)  # Displays the entity to the screen
 
         scorekeeper.display()
-        check_if_end()
+        if player.rect.top > HEIGHT:
+            end()
 
         pygame.display.update()  # Updates the screen
         frame_clock.tick(FPS)  # Sets the FPS
